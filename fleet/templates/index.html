@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>GoVehicle OS — Next-Gen Fleet Telematics & Maintenance Platform</title>
+
+<!-- Google Fonts: Outfit (Display & Geometry), Plus Jakarta Sans (UI & Precision Numbers), JetBrains Mono (Code/Mono) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="dark">
+
+<!-- ================= AUTHENTICATION PORTAL ================= -->
+<div class="cyber-auth-wrap" id="loginScreen">
+  <div class="cyber-auth-box">
+    <div class="auth-radar-ring">
+      <div class="radar-scan-sweep"></div>
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9C2.1 11.1 2 11.5 2 12v4c0 .6.4 1 1 1h2"/>
+        <circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
+      </svg>
+    </div>
+
+    <h1 class="auth-brand-heading">GoVehicle <span>OS</span></h1>
+    <p class="auth-brand-desc">Enterprise Telematics & Preventive Fleet Maintenance</p>
+
+    <div class="auth-form-card">
+      <div class="cyber-form-group">
+        <label>Operator ID / Username</label>
+        <div class="cyber-input-wrap">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <input id="loginUser" value="admin" placeholder="admin" autocomplete="username">
+        </div>
+      </div>
+
+      <div class="cyber-form-group">
+        <label>Security Key</label>
+        <div class="cyber-input-wrap">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input id="loginPass" value="admin123" type="password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+      </div>
+
+      <div id="loginError" class="auth-err-display"></div>
+
+      <button id="loginBtn" class="cyber-primary-btn w-100">
+        <span>ACCESS COMMAND TERMINAL</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+
+      <div class="auth-credential-hint">
+        <span class="live-dot-beacon"></span> Default Supervisor Credentials: <code>admin</code> / <code>admin123</code>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MAIN OS APPLICATION INTERFACE ================= -->
+<div class="cyber-os-container" id="appRoot" style="display:none">
+
+  <!-- FLOATING TOP COMMAND DECK -->
+  <header class="top-command-deck">
+    <div class="deck-top-row">
+      <!-- Brand & Telemetry -->
+      <div class="deck-brand-cluster">
+        <div class="cyber-logo-orb">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+            <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9C2.1 11.1 2 11.5 2 12v4c0 .6.4 1 1 1h2"/>
+            <circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
+          </svg>
+        </div>
+        <div class="brand-text-stack">
+          <div class="os-name">GoVehicle <span class="os-pill-tag">OS v3.0</span></div>
+          <div class="os-telemetry-status">
+            <span class="status-live-beacon"></span>
+            <span>TELEMETRY ONLINE</span>
+            <span class="clock-display" id="deckLiveClock">00:00:00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Segmented Navigation Deck -->
+      <nav class="deck-nav-segmented">
+        <button class="deck-nav-btn active" data-view="dashboard">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+          <span>Command Center</span>
+        </button>
+
+        <button class="deck-nav-btn" data-view="vehicles">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          <span>Fleet Registry</span>
+          <span class="badge-counter" id="deckVehicleCount">0</span>
+        </button>
+
+        <button class="deck-nav-btn" data-view="maintenance">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          <span>Service Pipeline</span>
+          <span class="badge-alert-dot" id="deckAlertCount">0</span>
+        </button>
+
+        <button class="deck-nav-btn" data-view="analytics">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <span>Cost Analytics</span>
+        </button>
+
+        <button class="deck-nav-btn" data-view="logs">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <span>Audit Logs</span>
+        </button>
+      </nav>
+
+      <!-- Global Search & Actions Deck -->
+      <div class="deck-actions-cluster">
+        <div class="deck-omni-search">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input id="globalSearchInput" placeholder="Quick Search... (Unit, Plate, Service)">
+          <kbd>Ctrl+K</kbd>
+        </div>
+
+        <button class="deck-icon-btn" id="themeToggleBtn" title="Toggle Visual Mode">
+          <svg class="sun-glyph" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="moon-glyph" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+
+        <button class="deck-btn-secondary" id="exportCsvBtn" title="Download Maintenance Schedule">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>CSV Export</span>
+        </button>
+
+        <button class="cyber-primary-btn" id="openAddVehicleModalBtn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>Provision Unit</span>
+        </button>
+
+        <!-- User Profile Pill -->
+        <div class="deck-user-chip">
+          <div class="user-avatar-hex" id="avatarInit">A</div>
+          <div class="user-chip-meta">
+            <div class="user-name-str" id="userName">Fleet Admin</div>
+            <div class="user-sub-role">Supervisor</div>
+          </div>
+          <button class="user-logout-btn" id="logoutBtn" title="Disconnect Session">⏻</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN SCROLLABLE VIEWPORT -->
+  <main class="cyber-viewport">
+
+    <!-- ================= VIEW 1: COMMAND CENTER ================= -->
+    <section id="view-dashboard" class="os-view active">
+
+      <!-- TOP ALERT TICKER -->
+      <div class="cyber-alert-banner" id="dashboardCriticalBanner" style="display:none">
+        <div class="alert-pulse-lamp"></div>
+        <div class="alert-info-stack">
+          <div class="alert-main-title">CRITICAL WORKSHOP NOTICE</div>
+          <div class="alert-sub-details" id="dashboardCriticalText">1 or more units have exceeded safe maintenance thresholds.</div>
+        </div>
+        <button class="alert-resolve-shortcut" onclick="switchView('maintenance', 'overdue')">View Critical Tasks ➔</button>
+      </div>
+
+      <!-- BENTO TELEMETRY METRICS -->
+      <div class="cyber-bento-grid">
+        <div class="bento-tile tile-cyan">
+          <div class="tile-header">
+            <span class="tile-tag">Active Fleet Size</span>
+            <div class="tile-glyph-box">🚛</div>
+          </div>
+          <div class="tile-number" id="bentoFleetSize">—</div>
+          <div class="tile-caption">Registered Telemetry Units</div>
+        </div>
+
+        <div class="bento-tile tile-mint">
+          <div class="tile-header">
+            <span class="tile-tag">Healthy & Nominal</span>
+            <div class="tile-glyph-box">⚡</div>
+          </div>
+          <div class="tile-number" id="bentoOnTrack">—</div>
+          <div class="tile-caption text-mint">100% Preventive Compliance</div>
+        </div>
+
+        <div class="bento-tile tile-amber">
+          <div class="tile-header">
+            <span class="tile-tag">Service Window (14d)</span>
+            <div class="tile-glyph-box">⏳</div>
+          </div>
+          <div class="tile-number" id="bentoDueSoon">—</div>
+          <div class="tile-caption text-amber">Approaching Threshold</div>
+        </div>
+
+        <div class="bento-tile tile-crimson">
+          <div class="tile-header">
+            <span class="tile-tag">Critical Overdue</span>
+            <div class="tile-glyph-box">⚠</div>
+          </div>
+          <div class="tile-number" id="bentoOverdue">—</div>
+          <div class="tile-caption text-crimson">Immediate Service Needed</div>
+        </div>
+
+        <div class="bento-tile tile-violet">
+          <div class="tile-header">
+            <span class="tile-tag">Fleet Spend (Lifetime)</span>
+            <div class="tile-glyph-box">₹</div>
+          </div>
+          <div class="tile-number" id="bentoTotalSpend">—</div>
+          <div class="tile-caption">Logged Maintenance Invoices</div>
+        </div>
+      </div>
+
+      <!-- MAIN SPLIT: RADAR CHARTS & PRIORITY STREAM -->
+      <div class="cyber-split-section">
+        <!-- Left: Visual Donut & Reliability Score -->
+        <div class="cyber-glass-panel">
+          <div class="panel-cyber-header">
+            <div>
+              <h3 class="panel-cyber-title">Operational Health Distribution</h3>
+              <p class="panel-cyber-desc">Fleet preventive service status</p>
+            </div>
+            <div class="reliability-halo-badge">
+              <span id="reliabilityHaloPercent">0%</span>
+              <small>RELIABILITY</small>
+            </div>
+          </div>
+          <div class="chart-box" style="height:270px">
+            <canvas id="healthDonutChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Right: Urgent Priority Action Stream -->
+        <div class="cyber-glass-panel">
+          <div class="panel-cyber-header">
+            <div>
+              <h3 class="panel-cyber-title">Priority Service Pipeline</h3>
+              <p class="panel-cyber-desc">Upcoming and overdue maintenance dispatch</p>
+            </div>
+            <button class="cyber-link-btn" onclick="switchView('maintenance')">Full Queue →</button>
+          </div>
+          <div class="priority-stream-container" id="dashboardPriorityQueueList"></div>
+        </div>
+      </div>
+
+      <!-- Utilization Bar Chart -->
+      <div class="cyber-glass-panel mt-3">
+        <div class="panel-cyber-header">
+          <div>
+            <h3 class="panel-cyber-title">Vehicle Odometer & Mileage Telemetry</h3>
+            <p class="panel-cyber-desc">Real-time mileage logged across active units</p>
+          </div>
+        </div>
+        <div class="chart-box" style="height:240px">
+          <canvas id="utilizationBarChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= VIEW 2: FLEET REGISTRY ================= -->
+    <section id="view-vehicles" class="os-view">
+      <div class="view-command-ribbon">
+        <div>
+          <h2 class="view-cyber-title">Fleet Registry</h2>
+          <p class="view-cyber-desc">Manage vehicle chassis, odometers, and individual service logs</p>
+        </div>
+
+        <div class="ribbon-controls-group">
+          <div class="ribbon-search">
+            <input id="vehicleSearchInput" placeholder="Filter fleet by unit, type, or plate...">
+          </div>
+          <select id="vehicleStatusFilter" class="ribbon-select">
+            <option value="all">All Operational Statuses</option>
+            <option value="ok">Nominal (On Track)</option>
+            <option value="soon">Attention Needed (Due Soon)</option>
+            <option value="overdue">Critical (Overdue)</option>
+          </select>
+          <div class="view-switcher-pill">
+            <button class="switcher-btn active" id="viewModeGridBtn" title="Grid Cards">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            </button>
+            <button class="switcher-btn" id="viewModeTableBtn" title="Data Table">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid Cards View -->
+      <div class="cyber-cards-matrix" id="vehiclesGridContainer"></div>
+
+      <!-- Table View -->
+      <div class="cyber-table-panel" id="vehiclesTableContainer" style="display:none">
+        <table class="cyber-data-table">
+          <thead>
+            <tr>
+              <th>Vehicle Designation</th>
+              <th>License Plate</th>
+              <th>Category</th>
+              <th>Odometer</th>
+              <th>Health Index</th>
+              <th>Status</th>
+              <th style="text-align:right">Action</th>
+            </tr>
+          </thead>
+          <tbody id="vehiclesTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ================= VIEW 3: SERVICE PIPELINE ================= -->
+    <section id="view-maintenance" class="os-view">
+      <div class="view-command-ribbon">
+        <div>
+          <h2 class="view-cyber-title">Service Pipeline & Maintenance Matrix</h2>
+          <p class="view-cyber-desc">Automated preventive milestone calculations (mileage & date thresholds)</p>
+        </div>
+
+        <div class="ribbon-controls-group">
+          <div class="ribbon-search">
+            <input id="maintenanceSearchInput" placeholder="Search service or vehicle...">
+          </div>
+          <div class="cyber-filter-pill-deck" id="maintenanceFilterPills">
+            <button class="pill-btn active" data-status="all">All Milestones</button>
+            <button class="pill-btn pill-danger-glow" data-status="overdue">🔴 Overdue</button>
+            <button class="pill-btn pill-warning-glow" data-status="soon">🟡 Due Soon</button>
+            <button class="pill-btn pill-mint-glow" data-status="ok">🟢 On Track</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="cyber-table-panel">
+        <table class="cyber-data-table">
+          <thead>
+            <tr>
+              <th>Vehicle Unit</th>
+              <th>Maintenance Service</th>
+              <th>Target Date</th>
+              <th>Target Odometer</th>
+              <th>Remaining Window</th>
+              <th>Condition</th>
+              <th style="text-align:right">Workshop Action</th>
+            </tr>
+          </thead>
+          <tbody id="maintenanceTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ================= VIEW 4: COST ANALYTICS ================= -->
+    <section id="view-analytics" class="os-view">
+      <div class="view-command-ribbon">
+        <div>
+          <h2 class="view-cyber-title">Cost Intelligence & Telemetry Analytics</h2>
+          <p class="view-cyber-desc">Maintenance capital expenditure and fleet stress metrics</p>
+        </div>
+      </div>
+
+      <div class="cyber-split-section">
+        <div class="cyber-glass-panel">
+          <div class="panel-cyber-header">
+            <div>
+              <h3 class="panel-cyber-title">Service Category Allocation</h3>
+              <p class="panel-cyber-desc">Preventive service cost breakdown</p>
+            </div>
+          </div>
+          <div class="chart-box" style="height:280px">
+            <canvas id="servicePolarChart"></canvas>
+          </div>
+        </div>
+
+        <div class="cyber-glass-panel">
+          <div class="panel-cyber-header">
+            <div>
+              <h3 class="panel-cyber-title">Fleet Mileage Telemetry</h3>
+              <p class="panel-cyber-desc">Odometer stress comparison</p>
+            </div>
+          </div>
+          <div class="chart-box" style="height:280px">
+            <canvas id="analyticsMileageChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= VIEW 5: AUDIT HISTORY ================= -->
+    <section id="view-logs" class="os-view">
+      <div class="view-command-ribbon">
+        <div>
+          <h2 class="view-cyber-title">Maintenance Audit Trail</h2>
+          <p class="view-cyber-desc">Immutable transaction log of completed vehicle work orders and invoices</p>
+        </div>
+        <button class="deck-btn-secondary" onclick="loadAuditHistory()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          <span>Refresh Audit Trail</span>
+        </button>
+      </div>
+
+      <div class="cyber-table-panel">
+        <table class="cyber-data-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Vehicle Unit</th>
+              <th>Service Rendered</th>
+              <th>Odometer</th>
+              <th>Invoiced Cost</th>
+              <th>Facility / Mechanic</th>
+              <th>Work Order Remarks</th>
+            </tr>
+          </thead>
+          <tbody id="auditHistoryTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ================= SLIDE-OVER VEHICLE INSPECTOR DRAWER ================= -->
+<div class="cyber-drawer-scrim" id="inspectorDrawerBackdrop">
+  <aside class="cyber-slide-drawer" id="vehicleInspectorDrawer">
+    <div class="drawer-header-strip">
+      <div class="drawer-header-info">
+        <span class="drawer-category-tag" id="drawerVehicleType">Box Truck</span>
+        <h2 class="drawer-title" id="drawerVehicleName">Unit 04</h2>
+        <div class="drawer-plate-badge" id="drawerVehiclePlate">TRK-0412</div>
+      </div>
+      <button class="drawer-dismiss-btn" id="drawerCloseBtn">✕</button>
+    </div>
+
+    <div class="drawer-scroll-body">
+      <!-- Odometer & Health HUD -->
+      <div class="drawer-telemetry-hud">
+        <div class="hud-box">
+          <span class="hud-box-label">Current Odometer</span>
+          <span class="hud-box-number" id="drawerOdometer">88,450 mi</span>
+        </div>
+        <div class="hud-box">
+          <span class="hud-box-label">Health Reliability</span>
+          <span class="hud-box-number text-mint" id="drawerHealthPercent">100%</span>
+        </div>
+      </div>
+
+      <!-- Quick Action Deck -->
+      <div class="drawer-actions-bar">
+        <button class="drawer-btn" id="drawerActionLogOil">🛢️ Quick Log Oil</button>
+        <button class="drawer-btn" id="drawerActionEdit">✎ Edit Specs</button>
+        <button class="drawer-btn btn-danger-text" id="drawerActionDelete">✕ Decommission</button>
+      </div>
+
+      <!-- Section: Preventive Cycles -->
+      <div class="drawer-block mt-3">
+        <h4 class="drawer-block-title">Preventive Routine Status</h4>
+        <div class="drawer-tasks-stack" id="drawerTasksContainer"></div>
+      </div>
+
+      <!-- Section: Historical Timeline -->
+      <div class="drawer-block mt-3">
+        <h4 class="drawer-block-title">Service Log History</h4>
+        <div class="cyber-timeline-track" id="drawerHistoryTimeline"></div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- ================= MODAL: REGISTER VEHICLE ================= -->
+<div class="cyber-modal-overlay" id="addVehicleModal">
+  <div class="cyber-modal-box">
+    <div class="modal-top-bar">
+      <div>
+        <h3 class="modal-heading">Provision Fleet Unit</h3>
+        <p class="modal-caption">Registers vehicle and attaches 5 automated service cycles</p>
+      </div>
+      <button class="modal-exit-btn" onclick="closeModal('addVehicleModal')">✕</button>
+    </div>
+    <div class="modal-body-form">
+      <div class="form-cyber-grid">
+        <div class="cyber-field">
+          <label>Vehicle Name / Designation</label>
+          <input id="addVehicleName" placeholder="e.g. Unit 25 (Ford Transit)">
+        </div>
+        <div class="cyber-field">
+          <label>Category</label>
+          <select id="addVehicleType">
+            <option>Box Truck</option>
+            <option>Cargo Van</option>
+            <option>Sedan</option>
+            <option>Flatbed</option>
+            <option>Pickup</option>
+          </select>
+        </div>
+        <div class="cyber-field">
+          <label>License Plate / VIN</label>
+          <input id="addVehiclePlate" placeholder="e.g. TRK-2501">
+        </div>
+        <div class="cyber-field">
+          <label>Current Odometer (Miles)</label>
+          <input id="addVehicleMileage" type="number" placeholder="e.g. 52000">
+        </div>
+      </div>
+    </div>
+    <div class="modal-bottom-actions">
+      <button class="deck-btn-secondary" onclick="closeModal('addVehicleModal')">Cancel</button>
+      <button class="cyber-primary-btn" id="saveVehicleSubmitBtn">Save & Provision Unit</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL: EDIT VEHICLE ================= -->
+<div class="cyber-modal-overlay" id="editVehicleModal">
+  <div class="cyber-modal-box">
+    <div class="modal-top-bar">
+      <div>
+        <h3 class="modal-heading">Edit Vehicle Specifications</h3>
+        <p class="modal-caption">Update chassis metadata and odometer telemetry</p>
+      </div>
+      <button class="modal-exit-btn" onclick="closeModal('editVehicleModal')">✕</button>
+    </div>
+    <div class="modal-body-form">
+      <div class="form-cyber-grid">
+        <div class="cyber-field">
+          <label>Vehicle Name</label>
+          <input id="editVehicleName">
+        </div>
+        <div class="cyber-field">
+          <label>Category</label>
+          <select id="editVehicleType">
+            <option>Box Truck</option>
+            <option>Cargo Van</option>
+            <option>Sedan</option>
+            <option>Flatbed</option>
+            <option>Pickup</option>
+          </select>
+        </div>
+        <div class="cyber-field">
+          <label>License Plate</label>
+          <input id="editVehiclePlate">
+        </div>
+        <div class="cyber-field">
+          <label>Current Odometer (Miles)</label>
+          <input id="editVehicleMileage" type="number">
+        </div>
+      </div>
+    </div>
+    <div class="modal-bottom-actions">
+      <button class="deck-btn-secondary" onclick="closeModal('editVehicleModal')">Cancel</button>
+      <button class="cyber-primary-btn" id="saveEditVehicleSubmitBtn">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL: LOG MAINTENANCE SERVICE ================= -->
+<div class="cyber-modal-overlay" id="logServiceModal">
+  <div class="cyber-modal-box">
+    <div class="modal-top-bar">
+      <div>
+        <h3 class="modal-heading">Log Completed Service</h3>
+        <p class="modal-caption" id="logServiceSubtitle">Vehicle Service Record</p>
+      </div>
+      <button class="modal-exit-btn" onclick="closeModal('logServiceModal')">✕</button>
+    </div>
+    <div class="modal-body-form">
+      <div class="service-highlight-ribbon">
+        <span class="ribbon-k">Service Milestones</span>
+        <span class="ribbon-v" id="logServiceNameDisplay">Oil Change</span>
+      </div>
+
+      <div class="form-cyber-grid mt-3">
+        <div class="cyber-field">
+          <label>Invoiced Cost (₹)</label>
+          <input id="logServiceCost" type="number" placeholder="e.g. 1200">
+        </div>
+        <div class="cyber-field">
+          <label>Workshop / Service Technician</label>
+          <input id="logServiceTech" value="Central Fleet Depot" placeholder="Facility Name">
+        </div>
+        <div class="cyber-field full-width">
+          <label>Work Order Remarks</label>
+          <input id="logServiceNotes" placeholder="Replaced filters, topped up synthetic fluids, inspection cleared.">
+        </div>
+      </div>
+    </div>
+    <div class="modal-bottom-actions">
+      <button class="deck-btn-secondary" onclick="closeModal('logServiceModal')">Cancel</button>
+      <button class="cyber-primary-btn" id="saveLogServiceSubmitBtn">Complete & Record Service</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST HUB -->
+<div class="cyber-toast-hub" id="toastHub"></div>
+
+<!-- JavaScript Logic -->
+<script src="/static/js/app.js"></script>
+</body>
+</html>
